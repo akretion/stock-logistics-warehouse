@@ -19,11 +19,20 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 ###############################################################################
-from openerp import models, api
+from openerp import models, api, fields
 
 
 class ProcurementOrder(models.Model):
     _inherit = 'procurement.order'
+
+    procurement_id = fields.Many2one(
+        'procurement.order',
+        string="Procurement",
+        copy=False)
+    procurement_ids = fields.One2many(
+        'procurement.order',
+        'procurement_id',
+        string="Procurements")
 
     @api.multi
     def get_mto_qty_to_order(self):
@@ -52,23 +61,29 @@ class ProcurementOrder(models.Model):
             'product_qty': qty,
             'product_uos_qty': uos_qty,
             'rule_id': rule.id,
+            'procurement_id': proc.id,
         }
 
     @api.model
     def _check(self, procurement):
         if procurement.rule_id and \
                 procurement.rule_id.action == 'split_procurement':
-            if procurement.state == 'running':
+            cancel_proc_list = [x.state == 'cancel'
+                                for x in procurement.procurement_ids]
+            done_cancel_test_list = [x.state in ('done', 'cancel')
+                                     for x in procurement.procurement_ids]
+            if all(cancel_proc_list):
+                procurement.write({'state': 'cancel'})
+            elif all(done_cancel_test_list):
                 return True
         return super(ProcurementOrder, self)._check(procurement)
 
     @api.multi
-    def run(self, autocommit=False):
-        res = super(ProcurementOrder, self).run(autocommit=autocommit)
-        for proc in self:
-            if proc.rule_id and \
-                    proc.rule_id.action == 'split_procurement':
-                proc.check()
+    def check(self, autocommit=False):
+        res = super(ProcurementOrder, self).check(autocommit=autocommit)
+        for procurement in self:
+            if procurement.procurement_id:
+                procurement.procurement_id.check(autocommit=autocommit)
         return res
 
     @api.model
