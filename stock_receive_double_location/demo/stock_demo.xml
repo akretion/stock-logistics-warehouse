@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+
+    <record id="stock.location_gate_a" model="stock.location">
+        <field name="picking_location_id" ref="stock.stock_location_components"/>
+    </record>
+
+
+</data>
+</openerp>

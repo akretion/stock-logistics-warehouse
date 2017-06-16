@@ -15,9 +15,9 @@
         "stock",
     ],
     "data": [
-        # "views/res_partner_view.xml",
+        "views/stock_location_view.xml",
     ],
     "demo": [
-        # "demo/res_partner_demo.xml",
+        "demo/stock_demo.xml",
     ],
 }

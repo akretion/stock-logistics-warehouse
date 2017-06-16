@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+
+
+    <record id="view_location_form" model="ir.ui.view">
+        <field name="model">stock.location</field>
+        <field name="inherit_id" ref="stock.view_location_form"/>
+        <field name="arch" type="xml">
+            <field name="active" position="after">
+                <group attrs="{'invisible': [('picking_location_id', '=', False)]}"       colspan="2">
+                    <separator string="This location is an overstock with a related picking location:"/>
+                </group>
+                <field name="picking_location_id"/>
+            </field>
+        </field>
+    </record>
+
+
+</data>
+</openerp>
