@@ -21,13 +21,17 @@ class ProductPutaway(models.Model):
         copy=True)
     method = fields.Selection(selection=_get_putaway_options)
 
+    @api.model
+    def _get_strategy_conditions(self, product, prd_putaway):
+        return (prd_putaway.product_product_id == product or
+                (not prd_putaway.product_product_id and
+                 prd_putaway.product_tmpl_id == product.product_tmpl_id))
+
     @api.multi
     def get_product_putaway_strategies(self, product):
         self.ensure_one()
         return self.product_location_ids.filtered(lambda x: (
-            x.product_product_id == product or
-            (not x.product_product_id and
-             x.product_tmpl_id == product.product_tmpl_id)))
+            self._get_strategy_conditions(product, x)))
 
     def putaway_apply(self, product):
         if self.method == 'per_product':
