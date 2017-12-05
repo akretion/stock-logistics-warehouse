@@ -13,20 +13,20 @@
                     <page string="Inventory Details" position="attributes">
                         <attribute name="attrs">{'invisible':[('state','=','draft')]}</attribute>
                     </page>
-                    <notebook position="before">
-                        <group>
-                            <field name="categ_ids"
-                                   nolabel="1"
-                                   attrs="{'invisible':[('filter','!=','categories')]}" />
-                            <field name="product_ids"
-                                   nolabel="1"
-                                   attrs="{'invisible':[('filter','!=','products')]}" />
-                            <field name="lot_ids"
-                                   nolabel="1"
-                                   attrs="{'invisible':[('filter','!=','lots')]}" />
-                        </group>
-                    </notebook>
                     <notebook position="inside">
+                        <page string="Capture Lines">
+                            <group>
+                                <field name="categ_ids"
+                                       nolabel="1"
+                                       attrs="{'invisible':[('filter','!=','categories')]}" />
+                                <field name="product_ids"
+                                       nolabel="1"
+                                       attrs="{'invisible':[('filter','!=','products')]}" />
+                                <field name="lot_ids"
+                                       nolabel="1"
+                                       attrs="{'invisible':[('filter','!=','lots')]}" />
+                            </group>
+                        </page>
                         <page string="Capture Lines"
                             attrs="{'invisible':[('filter','!=','empty')]}">
                             <field name="empty_line_ids" nolabel="1">
