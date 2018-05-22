@@ -20,6 +20,16 @@
 
 from openerp import models, fields, api
 from openerp.addons import decimal_precision as dp
+import operator as py_operator
+
+OPERATORS = {
+    '<': py_operator.lt,
+    '>': py_operator.gt,
+    '<=': py_operator.le,
+    '>=': py_operator.ge,
+    '=': py_operator.eq,
+    '!=': py_operator.ne
+}
 
 
 class ProductProduct(models.Model):
@@ -40,24 +50,23 @@ class ProductProduct(models.Model):
         computations."""
         self.immediately_usable_qty = self.virtual_available
 
+    @api.model
     def _search_immediately_usable_quantity(self, operator, value):
-        res = []
-        assert operator in (
-            '<', '>', '=', '!=', '<=', '>='
-        ), 'Invalid domain operator'
-        assert isinstance(
-            value, (float, int)
-        ), 'Invalid domain value'
-        if operator == '=':
-            operator = '=='
-
-        ids = []
+        """ Search function for the immediately_usable_qty field.
+        The search is quite similar to the Odoo search about quantity available
+        (addons/stock/models/product.py,253; _search_product_quantity function)
+        :param operator: str
+        :param value: str
+        :return: list of tuple (domain)
+        """
         products = self.search([])
-        for prod in products:
-            if eval(str(prod.immediately_usable_qty) + operator + str(value)):
-                ids.append(prod.id)
-        res.append(('id', 'in', ids))
-        return res
+        # Force prefetch
+        products.mapped("immediately_usable_qty")
+        product_ids = []
+        for product in products:
+            if OPERATORS[operator](product.immediately_usable_qty, value):
+                product_ids.append(product.id)
+        return [('id', 'in', product_ids)]
 
     immediately_usable_qty = fields.Float(
         digits=dp.get_precision('Product Unit of Measure'),
