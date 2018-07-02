@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- add picking to wave  -->
+    <record id="stock_picking_to_wave_form" model="ir.ui.view">
+        <field name="name">stock.picking.to.wave.form</field>
+        <field name="model">stock.picking.to.wave</field>
+        <field name="arch" type="xml">
+            <form string="Add pickings to wave">
+                <separator string="Select a wave"/>
+                <field name="wave_id" class="oe_inline" options="{'no_create_edit': True, 'no_open': True}"/>
+                <footer>
+                    <button name="attach_pickings" type="object" string="Add to Batch" class="btn-primary"/>
+                    <button string="Cancel" class="btn-default" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!--  add picking to wave action -->
+    <record id="stock_picking_to_wave_action" model="ir.actions.act_window">
+        <field name="name">Add to Batch</field>
+        <field name="res_model">stock.picking.to.wave</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="stock_picking_to_wave_form"/>
+        <field name="target">new</field>
+    </record>
+
+    <act_window id="stock_picking_to_wave_action_stock_picking"
+        multi="True"
+        key2="client_action_multi" name="Add to Batch"
+        res_model="stock.picking.to.wave" src_model="stock.picking"
+        view_mode="form" target="new" view_type="form"
+    />
+
+</odoo>
