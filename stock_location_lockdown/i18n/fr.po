@@ -17,6 +17,7 @@ msgstr ""
 
 #. module: stock_location_lockdown
 #: model:ir.model.fields,field_description:stock_location_lockdown.field_stock_location_lockdown_entrance
+#: field:stock.location,block_stock_entrance:0
 msgid "Block stock entrance"
 msgstr "Bloquer les entrées de stock"
 

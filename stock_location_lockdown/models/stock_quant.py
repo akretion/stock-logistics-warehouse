@@ -2,8 +2,7 @@
 # Copyright 2018 Akretion
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp import api, models, _
-from openerp.exceptions import UserError
+from openerp import api, exceptions, models, _
 
 
 class StockQuant(models.Model):
@@ -13,7 +12,7 @@ class StockQuant(models.Model):
     def _check_location(self, location):
         res = super(StockQuant, self)._check_location(location)
         if location.block_stock_entrance:
-            raise UserError(
+            raise exceptions.Warning(
                 _('The location %s is not configured to receive stock.')
                 % (location.name))
         return res

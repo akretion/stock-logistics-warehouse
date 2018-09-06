@@ -2,7 +2,7 @@
 # Copyright 2017 Eficent Business and IT Consulting Services S.L.
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
-from openerp.exceptions import UserError
+from openerp import exceptions
 from openerp.tests.common import TransactionCase
 
 
@@ -29,5 +29,5 @@ class TestStockLocationLockdown(TransactionCase):
             'name': 'test',
         }
         stock_move = self.env['stock.move'].create(move_vals)
-        with self.assertRaises(UserError):
+        with self.assertRaises(exceptions.Warning):
             stock_move.action_done()
