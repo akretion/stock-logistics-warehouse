@@ -9,11 +9,13 @@ class ResUsers(models.Model):
     _inherit = "res.users"
 
     warehouse_id = fields.Many2one(
-        'stock.warehouse', required=True,
+        'stock.warehouse',
+        string="Current Warehouse", required=True,
         context={'user_preference': True})
     warehouse_ids = fields.Many2many(
         'stock.warehouse',
-        hel='Allowed warehouses')
+        string="Allowed Warehouses",
+        required=True)
 
     @api.model
     def _get_available_warehouse_ids(self):
