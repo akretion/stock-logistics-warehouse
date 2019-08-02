@@ -2,16 +2,6 @@
 <openerp>
     <data>
 
-        <record model="res.groups" id="group_multi_warehouse">
-            <field name="name">Multi Warehouses</field>
-            <field name="category_id" ref="base.module_category_usability"/>
-        </record>
-
-        <record model="res.groups" id="group_restrict_warehouse">
-            <field name="name">Restrict Unique Warehouse</field>
-            <field name="category_id" ref="base.module_category_usability"/>
-        </record>
-
     <record id="ir_rule_stock_warehouse_allowed" model="ir.rule">
         <field name="model_id" ref="stock.model_stock_warehouse"/>
         <field name="domain_force">[('id', '=', user.warehouse_id.id)]</field>

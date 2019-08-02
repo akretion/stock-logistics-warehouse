@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<openerp>
+    <data>
+
+        <record model="res.groups" id="group_multi_warehouse">
+            <field name="name">Multi Warehouses</field>
+            <field name="category_id" ref="base.module_category_usability"/>
+        </record>
+
+        <record model="res.groups" id="group_restrict_warehouse">
+            <field name="name">Restrict Unique Warehouse</field>
+            <field name="category_id" ref="base.module_category_usability"/>
+        </record>
+
+    </data>
+</openerp>
+

@@ -13,9 +13,10 @@
     "application": False,
     "summary": "Restrict access in multi warehouse environment",
     "depends": [
-        "base_multi_warehouse",
+        "stock",
     ],
     "data": [
         'security/stock_security.xml',
+        'views/res_users.xml',
     ],
 }
