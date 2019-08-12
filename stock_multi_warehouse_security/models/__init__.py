@@ -4,3 +4,4 @@ from . import stock_location
 from . import stock_quant
 from . import stock_inventory
 from . import stock_quant_package
+from . import product_template
