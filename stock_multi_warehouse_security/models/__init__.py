@@ -5,3 +5,5 @@ from . import stock_quant
 from . import stock_inventory
 from . import stock_quant_package
 from . import product_template
+from . import res_users
+from . import stock_warehouse

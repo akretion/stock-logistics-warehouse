@@ -23,5 +23,6 @@
         'views/stock_location.xml',
         'views/stock_quant_package.xml',
         'views/stock_quant.xml',
+        'views/res_users.xml',
     ],
 }

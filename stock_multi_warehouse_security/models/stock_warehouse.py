@@ -15,13 +15,8 @@ class StockWarhouse(models.Model):
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
         context = dict(self.env.context)
-        newself = self
         if context.pop('user_preference', None):
-            # We browse as superuser. Otherwise, the user would be able to
-            # select only the currently visible warehouses (according to 
-            # rules)
             warehouses = self._get_available_warehouse_ids()
             args = (args or []) + [('id', 'in', warehouses.ids)]
-            newself = newself.sudo()
-        return super(StockWarhouse, newself.with_context(context)).\
+        return super(StockWarhouse, self.with_context(context)).\
             name_search(name=name, args=args, operator=operator, limit=limit)

@@ -16,7 +16,6 @@
         "stock",
     ],
     "data": [
-        'security/stock_security.xml',
         'views/res_users.xml',
     ],
 }

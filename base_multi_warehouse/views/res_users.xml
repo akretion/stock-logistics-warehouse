@@ -8,9 +8,7 @@
             <field name="inherit_id" ref="base.view_users_form" />
             <field name="arch" type="xml">
                 <xpath expr="//page[@string='Access Rights']" position="inside">
-                    <group string="Multi Warehouses">
-                        <field name="warehouse_ids" widget="many2many_tags"
-                               groups="base_multi_warehouse.group_multi_warehouse"/>
+                    <group string="Warehouses">
                         <field name="warehouse_id" options="{'no_create': True}"/>
                     </group>
                 </xpath>
@@ -22,8 +20,7 @@
             <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
             <field name="arch" type="xml">
                 <field name="company_id" position="after">
-                    <field name="warehouse_id" readonly="0" options="{'no_create': True}"
-                           groups="base_multi_warehouse.group_multi_warehouse"/>
+                    <field name="warehouse_id" readonly="0" options="{'no_create': True}"/>
                 </field>
             </field>
         </record>
