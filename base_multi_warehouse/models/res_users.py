@@ -17,12 +17,6 @@ class ResUsers(models.Model):
         string="Allowed Warehouses",
         required=True)
 
-    @api.model
-    def _get_available_warehouse_ids(self):
-        whs = super(ResUsers, self)._get_available_warehouse_ids()
-        remote_whs = whs.mapped('remote_warehouse_ids')
-        return whs | remote_whs
-
     @api.multi
     @api.constrains('warehouse_id', 'warehouse_ids')
     def _check_warehouse(self):
