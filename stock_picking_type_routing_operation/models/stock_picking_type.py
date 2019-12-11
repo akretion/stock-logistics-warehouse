@@ -1,6 +1,7 @@
 # Copyright 2019 Camptocamp (https://www.camptocamp.com)
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
-from odoo import _, api, exceptions, fields, models
+from openerp import _, api, fields, models
+from openerp.exceptions import Warning as ValidationError
 
 
 class StockPickingType(models.Model):
@@ -30,7 +31,7 @@ class StockPickingType(models.Model):
             if not picking_type[routing_location_fieldname]:
                 continue
             if len(picking_type[routing_location_fieldname]) > 1:
-                raise exceptions.ValidationError(_(
+                raise ValidationError(_(
                     'The same picking type cannot be used on different '
                     'locations having routing operations.'
                 ))
@@ -38,7 +39,7 @@ class StockPickingType(models.Model):
                 picking_type[routing_location_fieldname]
                 != picking_type[default_location_fieldname]
             ):
-                raise exceptions.ValidationError(_(
+                raise ValidationError(_(
                     'A picking type for routing operations cannot have a'
                     ' different default %s location than the location it '
                     'is used on.'
@@ -51,7 +52,7 @@ class StockPickingType(models.Model):
             ]
             other = self.search(domain)
             if other:
-                raise exceptions.ValidationError(
+                raise ValidationError(
                     _('Another routing operation picking type (%s) exists for'
                       ' the same %s location.') % (other.display_name,
                                                    message_fragment)

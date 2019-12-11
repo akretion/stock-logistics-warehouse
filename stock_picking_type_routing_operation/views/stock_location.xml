@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<odoo>
+<openerp>
+    <data>
     <record id="view_location_form_inherit" model="ir.ui.view">
         <field name="name">stock.location.form.inherit</field>
         <field name="model">stock.location</field>
@@ -11,4 +12,5 @@
             </field>
         </field>
     </record>
-</odoo>
+</data>
+</openerp>

@@ -1,7 +1,7 @@
 # Copyright 2019 Camptocamp SA
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
-from odoo import api, models, fields, _
-from odoo.exceptions import ValidationError
+from openerp import api, models, fields, _
+from openerp.exceptions import Warning as ValidationError
 
 
 class StockLocation(models.Model):
@@ -65,10 +65,8 @@ class StockLocation(models.Model):
         # is searched in memory. This is to avoid doing an SQL query
         # for each location in the tree.
         tree = self.search(
-            [('id', 'parent_of', self.id)],
-            # the recordset will be ordered bottom location to top location
-            order='parent_path desc'
-        )
+            [('parent_right', '>', self.parent_right), ('parent_left', '<=',  self.parent_left)],
+            order="parent_left desc")
         if routing_type == 'src':
             routing_fieldname = 'src_routing_location_ids'
             default_location_fieldname = 'default_location_src_id'
