@@ -21,6 +21,13 @@ class StockMove(models.Model):
         dest_moves = self._split_per_dest_routing_operation()
         dest_moves._apply_move_location_dest_routing_operation()
 
+    def _find_picking_type_for_routing(self, location, routing_type):
+        """
+            Hook to be able to pass context when searching the picking type
+            for routing.
+        """
+        return location._find_picking_type_for_routing(routing_type)
+
     def _split_per_src_routing_operation(self):
         """Split moves per source routing operations
 
@@ -51,9 +58,8 @@ class StockMove(models.Model):
             # where we have to take products
             routing_quantities = {}
             for source, qty in move_lines.items():
-                routing_picking_type = source._find_picking_type_for_routing(
-                    "src"
-                )
+                routing_picking_type = move._find_picking_type_for_routing(
+                    source, "src")
                 routing_quantities.setdefault(routing_picking_type, 0.0)
                 routing_quantities[routing_picking_type] += qty
 
@@ -130,7 +136,7 @@ class StockMove(models.Model):
             destination = move.move_line_ids[0].location_dest_id
             # we have to add a move as destination
             # we have to add move as origin
-            routing = source._find_picking_type_for_routing("src")
+            routing = move._find_picking_type_for_routing(source, "src")
             if not routing:
                 continue
 
@@ -231,9 +237,8 @@ class StockMove(models.Model):
                 if dest in routing_operations:
                     routing_picking_type = routing_operations[dest]
                 else:
-                    routing_picking_type = dest._find_picking_type_for_routing(
-                        "dest"
-                    )
+                    routing_picking_type = move._find_picking_type_for_routing(
+                        dest, "dest")
                 routing_move_lines.setdefault(
                     routing_picking_type, self.env["stock.move.line"].browse()
                 )
@@ -286,7 +291,8 @@ class StockMove(models.Model):
             # locations, they have been split in
             # _split_per_routing_operation(), so we can take the first one
             destination = move.move_line_ids[0].location_dest_id
-            picking_type = destination._find_picking_type_for_routing("dest")
+            picking_type = move._find_picking_type_for_routing(
+                destination, "dest")
             if not picking_type:
                 continue
 
