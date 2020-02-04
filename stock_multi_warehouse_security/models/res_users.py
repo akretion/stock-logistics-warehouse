@@ -16,8 +16,8 @@ class ResUsers(models.Model):
     @api.multi
     @api.constrains('warehouse_id', 'warehouse_ids')
     def _check_warehouse(self):
-        if any(user.company_ids and 
-               user.company_id not in user.company_ids for user in self):
+        if any(user.warehouse_ids and
+               user.warehouse_id not in user.warehouse_ids for user in self):
             raise exceptions.Warning(
                 _('The chosen warehouse is not in the allowed warehouses for \
                    this user'))
