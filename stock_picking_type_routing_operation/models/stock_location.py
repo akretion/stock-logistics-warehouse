@@ -65,7 +65,7 @@ class StockLocation(models.Model):
         # is searched in memory. This is to avoid doing an SQL query
         # for each location in the tree.
         tree = self.search(
-            [('parent_right', '>', self.parent_right), ('parent_left', '<=',  self.parent_left)],
+            [('parent_right', '>=', self.parent_right), ('parent_left', '<=',  self.parent_left)],
             order="parent_left desc")
         if routing_type == 'src':
             routing_fieldname = 'src_routing_location_ids'
