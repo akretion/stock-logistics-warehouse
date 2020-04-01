@@ -18,6 +18,7 @@
     ],
     "data": [
         'views/res_users.xml',
+        'views/stock_warehouse_orderpoint.xml',
     ],
     "post_init_hook": "post_init_hook",
 }
