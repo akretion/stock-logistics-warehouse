@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 # Copyright 2019-2020 Camptocamp (https://www.camptocamp.com)
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
 
-from odoo import fields, models
+from openerp import fields, models, api
 
 
 def _default_sequence(model):
@@ -40,27 +41,27 @@ class StockRouting(models.Model):
         )
     ]
 
+    @api.multi
     def _default_sequence(self):
         return _default_sequence(self)
 
+    @api.model
     def _routing_rule_for_moves(self, moves):
         """Return a routing rule for moves
 
         :param move: recordset of the move
         :return: dict {move: {rule: move_lines}}
         """
+
         result = {move: {} for move in moves}
         valid_rules_for_move = set()
-        for move_line in moves.mapped("move_line_ids"):
-            src_location = move_line.location_id
-            dest_location = move_line.location_dest_id
-            location_tree = (
-                src_location._location_parent_tree()
-                + dest_location._location_parent_tree()
-            )
+        for quant in moves.mapped("reserved_quant_ids"):
+            move = quant.reservation_id
+            location = quant.location_id
+            location_tree = location._location_parent_tree()
             candidate_routings = self.search([("location_id", "in", location_tree.ids)])
 
-            result.setdefault(move_line.move_id, [])
+            result.setdefault(move, [])
             # the first location is the current move line's source or dest
             # location, then we climb up the tree of locations
             for loc in location_tree:
@@ -71,25 +72,25 @@ class StockRouting(models.Model):
                 found = False
                 for rule in rules:
                     if not (
-                        (move_line.move_id, rule) in valid_rules_for_move
-                        or rule._is_valid_for_moves(move_line.move_id)
+                        (move, rule) in valid_rules_for_move
+                        or rule._is_valid_for_moves(move)
                     ):
                         continue
                     # memorize the result so we don't compute it for
                     # every move line
-                    valid_rules_for_move.add((move_line.move_id, rule))
-                    if rule in result[move_line.move_id]:
-                        result[move_line.move_id][rule] |= move_line
+                    valid_rules_for_move.add((move, rule))
+                    if rule in result[move]:
+                        result[move][rule] |= quant
                     else:
-                        result[move_line.move_id][rule] = move_line
+                        result[move][rule] = quant
                     found = True
                     break
                 if found:
                     break
             else:
                 empty_rule = self.env["stock.routing.rule"].browse()
-                if empty_rule in result[move_line.move_id]:
-                    result[move_line.move_id][empty_rule] |= move_line
+                if empty_rule in result[move]:
+                    result[move][empty_rule] |= quant
                 else:
-                    result[move_line.move_id][empty_rule] = move_line
+                    result[move][empty_rule] = quant
         return result

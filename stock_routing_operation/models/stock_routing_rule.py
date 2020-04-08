@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 # Copyright 2019-2020 Camptocamp (https://www.camptocamp.com)
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
 
-from odoo import _, api, exceptions, fields, models
-from odoo.osv import expression
-from odoo.tools.safe_eval import safe_eval
+from openerp import _, api, exceptions, fields, models
+from openerp.osv import expression
+from openerp.tools.safe_eval import safe_eval
 
 from .stock_routing import _default_sequence
 
@@ -19,7 +20,7 @@ class StockRoutingRule(models.Model):
     )
     routing_location_id = fields.Many2one(related="routing_id.location_id")
     method = fields.Selection(
-        selection=[("pull", "Pull"), ("push", "Push")],
+        selection=[("pull", "Pull")],
         help="On pull, the routing is applied when the source location of "
         "a move line matches the source location of the rule. "
         "On push, the routing is applied when the destination location of "
@@ -39,6 +40,7 @@ class StockRoutingRule(models.Model):
         "routing rule is applicable or not.",
     )
 
+    @api.model
     def _default_sequence(self):
         return _default_sequence(self)
 
@@ -48,7 +50,7 @@ class StockRoutingRule(models.Model):
             base_location = record.routing_location_id
 
             if record.method == "pull" and record.location_src_id != base_location:
-                raise exceptions.ValidationError(
+                raise exceptions.Warning(
                     _(
                         "Operation type of a rule used as 'pull' must have '{}' as"
                         " source location."
@@ -56,19 +58,21 @@ class StockRoutingRule(models.Model):
                 )
             elif record.method == "push" and record.location_dest_id != base_location:
 
-                raise exceptions.ValidationError(
+                raise exceptions.Warning(
                     _(
                         "Operation type of a rule used as 'push' must have '{}' as"
                         " destination location."
                     ).format(base_location.display_name)
                 )
 
+    @api.multi
     def _is_valid_for_moves(self, moves):
         if not self.rule_domain:
             return self
         domain = safe_eval(self.rule_domain)
         return self._eval_routing_domain(moves, domain)
 
+    @api.multi
     def _eval_routing_domain(self, moves, domain):
         if not domain:
             return self
