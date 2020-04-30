@@ -10,4 +10,4 @@ class StockInventory(models.Model):
 
     warehouse_id = fields.Many2one(
         'stock.warehouse', related='location_id.warehouse_id',
-        store=True, index=True)
+        store=True, index=True, readonly=True)
