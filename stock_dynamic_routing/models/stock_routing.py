@@ -2,9 +2,8 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl)
 
 from collections import defaultdict
-from functools import lru_cache
 
-from odoo import fields, models
+from openerp import api, fields, models
 
 
 def _default_sequence(model):
@@ -43,12 +42,14 @@ class StockRouting(models.Model):
         )
     ]
 
+    @api.multi
     def _default_sequence(self):
         return _default_sequence(self)
 
     # TODO would be nice to add a constraint that would prevent to
     # have a pull + a pull routing that would apply on the same move
     # TODO write tests for this
+    @api.model
     def _find_rule_for_location(self, move, src_location, dest_location):
         """Return the routing rule for a source or destination location
 
@@ -63,16 +64,11 @@ class StockRouting(models.Model):
         # at once even if we don't use the "push" candidates, we can spare
         # some queries
         pull_location_tree = src_location._location_parent_tree()
-        push_location_tree = dest_location._location_parent_tree()
+#        push_location_tree = dest_location._location_parent_tree()
         candidate_rules = self.env["stock.routing.rule"].search(
             [
-                "|",
-                "&",
                 ("routing_location_id", "in", pull_location_tree.ids),
                 ("method", "=", "pull"),
-                "&",
-                ("routing_location_id", "in", push_location_tree.ids),
-                ("method", "=", "push"),
             ]
         )
         candidate_rules.sorted(lambda r: (r.routing_id.sequence, r.sequence))
@@ -82,15 +78,10 @@ class StockRouting(models.Model):
         if rule:
             return rule
 
-        rule = self._get_location_routing_rule(
-            move, push_location_tree, candidate_rules
-        )
-        if rule:
-            return rule
-
         empty_rule = self.env["stock.routing.rule"].browse()
         return empty_rule
 
+    @api.model
     def _routing_rule_for_move_lines(self, moves):
         """Return a routing rule for move lines
 
@@ -101,21 +92,28 @@ class StockRouting(models.Model):
         :return: dict {move: {rule: move_lines}}
         """
         # ensure the cache is clean
-        self.__cached_is_rule_valid_for_move.cache_clear()
+        #self.__cached_is_rule_valid_for_move.cache_clear()
 
         result = {
-            move: defaultdict(self.env["stock.move.line"].browse) for move in moves
+            move: defaultdict(self.env["stock.quant"].browse) for move in moves
         }
-        for move_line in moves.mapped("move_line_ids"):
-            rule = self._find_rule_for_location(
-                move_line.move_id, move_line.location_id, move_line.location_dest_id
-            )
-            result[move_line.move_id][rule] |= move_line
+        cache = {}
+        for quant in moves.mapped("reserved_quant_ids"):
+            key = (quant.reservation_id, quant.location_id)
+            if key in cache:
+                rule = cache[key]
+            else:
+                rule = self._find_rule_for_location(
+                    quant.reservation_id, quant.location_id, quant.reservation_id.location_dest_id
+                )
+            cache[key] = rule
+            result[quant.reservation_id][rule] |= quant
 
         # free memory used for the cache
-        self.__cached_is_rule_valid_for_move.cache_clear()
+        #self.__cached_is_rule_valid_for_move.cache_clear()
         return result
 
+    @api.model
     def _routing_rule_for_moves(self, moves):
         """Return a routing rule for moves
 
@@ -126,7 +124,7 @@ class StockRouting(models.Model):
         :return: dict {move: rule}}
         """
         # ensure the cache is clean
-        self.__cached_is_rule_valid_for_move.cache_clear()
+        #self.__cached_is_rule_valid_for_move.cache_clear()
 
         result = {}
         for move in moves:
@@ -136,13 +134,13 @@ class StockRouting(models.Model):
             result[move] = rule
 
         # free memory used for the cache
-        self.__cached_is_rule_valid_for_move.cache_clear()
+        #self.__cached_is_rule_valid_for_move.cache_clear()
         return result
 
     # Do not use ormcache, which would invalidate cache of other workers every
     # time we clear it. We only need a local cache used for the duration of the
     # execution of
-    @lru_cache()
+    @api.model
     def __cached_is_rule_valid_for_move(self, rule, move):
         """To be used only by _routing_rule_for_move(_line)s
 
@@ -152,6 +150,7 @@ class StockRouting(models.Model):
         """
         return rule._is_valid_for_moves(move)
 
+    @api.model
     def _get_location_routing_rule(self, move, location_tree, rules):
         # the first location is the current move line's source or dest
         # location, then we climb up the tree of locations

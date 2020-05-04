@@ -1,18 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<odoo>
+<openerp>
+    <data>
     <record id="view_stock_routing_form" model="ir.ui.view">
         <field name="name">stock.routing.form</field>
         <field name="model">stock.routing</field>
         <field name="arch" type="xml">
             <form string="Stock Routing">
-                <div class="oe_button_box" name="button_box">
-                </div>
-                <widget
-                    name="web_ribbon"
-                    title="Archived"
-                    bg_color="bg-danger"
-                    attrs="{'invisible': [('active', '=', True)]}"
-                />
                 <label for="location_id" class="oe_edit_only" />
                 <h1>
                     <field name="location_id" />
@@ -81,7 +74,6 @@
         <field name="type">ir.actions.act_window</field>
         <field name="view_id" ref="view_stock_routing_tree" />
         <field name="search_view_id" ref="view_stock_routing_search" />
-        <field name="context" />
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Add a Stock Routing
@@ -91,7 +83,8 @@
     <menuitem
         action="action_stock_routing"
         id="menu_stock_routing"
-        parent="stock.menu_warehouse_config"
+        parent="stock.menu_stock_configuration"
         sequence="30"
     />
-</odoo>
+    </data>
+</openerp>
