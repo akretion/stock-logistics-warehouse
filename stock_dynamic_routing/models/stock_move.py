@@ -302,7 +302,7 @@ class StockMove(models.Model):
             # by the method.
             # Update => Maybe useless as the move has been splitted before and only the
             # splitted part will be returned to action_assign?
-#            move.with_context(exclude_apply_dynamic_routing=True).action_assign()
+            move.with_context(exclude_apply_dynamic_routing=True).action_assign()
 
         pickings_to_check_for_emptiness._dynamic_routing_handle_empty()
 
