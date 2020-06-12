@@ -7,11 +7,12 @@ from openerp import api, models
 class StockMove(models.Model):
     _inherit = "stock.move"
 
-    @api.multi
-    def action_assign(self):
-        super(StockMove, self).action_assign()
-        if not self.env.context.get("exclude_apply_routing_operation"):
-            self._apply_src_move_routing_operation()
+# This is managed in custom module because we need to delay the call to _apply_src_move_routing_operation...
+#    @api.multi
+#    def action_assign(self):
+#        super(StockMove, self).action_assign()
+#        if not self.env.context.get("exclude_apply_routing_operation"):
+#            self._apply_src_move_routing_operation()
             # Does not make sense at reservation time in v8, because operation
             # are not generated yet
 #            self._apply_dest_move_routing_operation()
