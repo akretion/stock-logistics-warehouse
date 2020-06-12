@@ -59,15 +59,16 @@ class StockMove(models.Model):
 #        self._apply_routing_rule_pull(moves_with_routing_details)
 #        self._apply_routing_rule_push(moves_with_routing_details)
 
-    @api.multi
-    def action_assign(self):
-        if self.env.context.get("exclude_apply_dynamic_routing"):
-            super(StockMove, self).action_assign()
-        else:
-            # these methods will call _action_assign in a savepoint
-            # and modify the routing if necessary
-            moves = self._split_and_apply_routing()
-            super(StockMove, moves).action_assign()
+# FIXME for now it is managed in custom since we want to delay the _split_and_apply_routing...
+#    @api.multi
+#    def action_assign(self):
+#        if self.env.context.get("exclude_apply_dynamic_routing"):
+#            super(StockMove, self).action_assign()
+#        else:
+#            # these methods will call _action_assign in a savepoint
+#            # and modify the routing if necessary
+#            moves = self._split_and_apply_routing()
+#            super(StockMove, moves).action_assign()
 
     @api.multi
     def _split_and_apply_routing(self):
