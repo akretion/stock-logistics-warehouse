@@ -260,7 +260,6 @@ class StockMove(models.Model):
                 # The source of the dest. move will be changed to match it,
                 # which may reapply a new routing rule on the dest. move.
                 move.write({
-                    'location_id': routing_rule.location_src_id.id,
                     'location_dest_id': routing_rule.location_dest_id.id,
                     'picking_type_id': routing_rule.picking_type_id.id,
                 })
@@ -277,7 +276,6 @@ class StockMove(models.Model):
                 # we have to add a routing move before the current move to
                 # route the goods in the correct place
                 move.write({
-                    'location_id': routing_rule.location_src_id.id,
                     'location_dest_id': routing_rule.location_dest_id.id,
                     'picking_type_id': routing_rule.picking_type_id.id,
                 })
@@ -286,7 +284,6 @@ class StockMove(models.Model):
                 )
             else:
                 move.write({
-                    'location_id': routing_rule.location_src_id.id,
                     'picking_type_id': routing_rule.picking_type_id.id,
                 })
 
