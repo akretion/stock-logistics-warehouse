@@ -159,7 +159,10 @@ class StockMove(models.Model):
         moves_routing = {}
         no_loc = self.env["stock.location"].browse()
         for move in self:
-            if move.state not in ("assigned"):
+            # avoid splitting move if reservation is uncomplete in case of one policy. We'll do this
+            # if picking policy becomes direct. The goal is to avoid to split uselessly moves.
+            # on v14, it should not be needed as splitted moves should also be merged (to be confirmed)
+            if (move.picking_id.move_type == 'one' and move.state not in ("assigned")) or not move.reserved_quant_ids:
                 continue
 
             # Group move lines per their rule, some may need an additional
@@ -175,21 +178,18 @@ class StockMove(models.Model):
                 moves_routing[move][self.RoutingDetails(rule, no_loc)] = sum(
                     quants.mapped("qty")
                 )
-#            if move.state == "partially_available":
-#                # consider unreserved quantity as without routing, so it will
-#                # be split if another part of the quantity need a routing
-#                missing_reserved_uom_quantity = (
-#                    move.product_uom_qty - move.reserved_availability
-#                )
-#                missing_reserved_quantity = move.product_uom._compute_quantity(
-#                    missing_reserved_uom_quantity,
-#                    move.product_id.uom_id,
-#                    # this matches what is done in StockMove._action_assign()
-#                    rounding_method="HALF-UP",
-#                )
-#                routing_details = self._no_routing_details()
-#                moves_routing[move].setdefault(routing_details, 0)
-#                moves_routing[move][routing_details] += missing_reserved_quantity
+            if move.state != "assigned":
+                # consider unreserved quantity as without routing, so it will
+                # be split if another part of the quantity need a routing
+                missing_reserved_uom_quantity = (
+                    move.product_uom_qty - move.reserved_availability
+                )
+                missing_reserved_quantity = self.env['product.uom']._compute_qty(
+                    move.product_uom.id, missing_reserved_uom_quantity,
+                    move.product_id.uom_id.id, rounding_method="HALF-UP")
+                routing_details = self._no_routing_details()
+                moves_routing[move].setdefault(routing_details, 0)
+                moves_routing[move][routing_details] += missing_reserved_quantity
         return moves_routing
 
     @api.multi
