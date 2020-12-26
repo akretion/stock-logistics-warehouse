@@ -9,7 +9,6 @@ from odoo import api, models
 class ProductProduct(models.Model):
     _inherit = "product.product"
 
-    @api.multi
     def _compute_available_quantities_dict(self):
         res, stock_dict = super(
             ProductProduct, self
