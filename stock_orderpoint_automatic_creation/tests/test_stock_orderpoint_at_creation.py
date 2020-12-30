@@ -16,20 +16,18 @@ class TestStockOderpointAutomaticCreation(SavepointCase):
             {
                 "name": "Orderpoint",
                 "create_orderpoints": "yes",
-                "type": "normal",
             }
         )
         cls.category2 = category_obj.create(
             {
                 "name": "No_Orderpoint",
                 "create_orderpoints": "no",
-                "type": "normal",
             }
         )
 
     def test_orderpoint_create(self):
         # Company set not to create orderpoints
-        self.env.user.company_id.create_orderpoints = False
+        self.env.company.create_orderpoints = False
         product_obj = self.env["product.product"]
         self.product = product_obj.create({"name": "Test", "type": "product"})
         orderpoints = self.wh_orderpoint.search([("product_id", "=", self.product.id)])
@@ -60,9 +58,9 @@ class TestStockOderpointAutomaticCreation(SavepointCase):
             len(orderpoints3), 1, "Error orderpoint quantity does not match"
         )
         # Company set to create orderpoints
-        self.env.user.company_id.create_orderpoints = True
-        self.env.user.company_id.orderpoint_product_min_qty = 10.0
-        self.env.user.company_id.orderpoint_product_max_qty = 50.0
+        self.env.company.create_orderpoints = True
+        self.env.company.orderpoint_product_min_qty = 10.0
+        self.env.company.orderpoint_product_max_qty = 50.0
         # A new warehouse is created. Now we have two in this company.
         self.warehouse = self.env["stock.warehouse"].create(
             {"name": "New WH", "code": "NEWWH"}
