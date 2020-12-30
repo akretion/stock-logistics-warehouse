@@ -27,7 +27,6 @@ class ResCompany(models.Model):
         help="Check this for automatic orderpoints",
     )
 
-    @api.multi
     @api.constrains("orderpoint_product_max_qty", "orderpoint_product_min_qty")
     def _check_orderpoint_product_qty(self):
         rounding = self.env["decimal.precision"].precision_get("Product Price")

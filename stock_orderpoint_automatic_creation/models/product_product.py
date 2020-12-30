@@ -10,7 +10,7 @@ class ProductProduct(models.Model):
 
     @api.model
     def _prepare_orderpoint_vals(self, warehouse):
-        company = self.env.user.company_id
+        company = self.env.company
         return {
             "name": self.name,
             "product_id": self.id,
@@ -20,27 +20,27 @@ class ProductProduct(models.Model):
             "location_id": warehouse.lot_stock_id.id,
         }
 
-    @api.model
-    @api.returns("self", lambda value: value.id)
-    def create(self, vals):
-        product = super(ProductProduct, self).create(vals)
-        if not product.type == "product" or product.create_orderpoint == "no":
-            return product
-        if product.categ_id.create_orderpoints == "no":
-            return product
-        if (
-            product.create_orderpoint == "yes"
-            or product.categ_id.create_orderpoints == "yes"
-            or self.env.user.company_id.create_orderpoints
-        ):
-            orderpoint_obj = self.env["stock.warehouse.orderpoint"]
-            wh_obj = self.env["stock.warehouse"]
-            warehouses = wh_obj.search(
-                [
-                    ("company_id", "=", self.env.user.company_id.id),
-                ]
-            )
-            for warehouse in warehouses:
-                values = product._prepare_orderpoint_vals(warehouse)
-                orderpoint_obj.create(values)
-        return product
+    @api.model_create_multi
+    def create(self, vals_list):
+        products = super().create(vals_list)
+        for product in products:
+            if not product.type == "product" or product.create_orderpoint == "no":
+                continue
+            if product.categ_id.create_orderpoints == "no":
+                continue
+            if (
+                product.create_orderpoint == "yes"
+                or product.categ_id.create_orderpoints == "yes"
+                or self.env.company.create_orderpoints
+            ):
+                orderpoint_obj = self.env["stock.warehouse.orderpoint"]
+                wh_obj = self.env["stock.warehouse"]
+                warehouses = wh_obj.search(
+                    [
+                        ("company_id", "=", self.env.company.id),
+                    ]
+                )
+                for warehouse in warehouses:
+                    values = product._prepare_orderpoint_vals(warehouse)
+                    orderpoint_obj.create(values)
+        return products
