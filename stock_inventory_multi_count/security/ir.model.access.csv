@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_stock_inventory_count_round_user,stock.inventory.count.round user,model_stock_inventory_count_round,stock.group_stock_user,1,1,1,0
+access_stock_inventory_count_round_manager,stock.inventory.count.round manager,model_stock_inventory_count_round,stock.group_stock_manager,1,1,1,1
+access_stock_inventory_count_line_user,stock.inventory.count.line user,model_stock_inventory_count_line,stock.group_stock_user,1,1,1,0
+access_stock_inventory_count_line_manager,stock.inventory.count.line manager,model_stock_inventory_count_line,stock.group_stock_manager,1,1,1,1
+access_stock_inventory_count_import_user,stock.inventory.count.import user,model_stock_inventory_count_import,stock.group_stock_user,1,1,1,1
+access_stock_inventory_count_arbitrate_manager,stock.inventory.count.arbitrate manager,model_stock_inventory_count_arbitrate,stock.group_stock_manager,1,1,1,1

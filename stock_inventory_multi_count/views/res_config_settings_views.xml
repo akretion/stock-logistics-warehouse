@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.multi.count</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="stock.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//div[@id='production_lot_info']" position="after">
+                <h2>Blind Multi Count</h2>
+                <div class="row mt16 o_settings_container" id="multi_count_setting">
+                    <div class="col-12 col-lg-6 o_setting_box">
+                        <div class="o_setting_right_pane">
+                            <span class="o_form_label">Defaults for new inventories</span>
+                            <div class="text-muted">
+                                Applied when a new inventory adjustment is set to blind multi count.
+                            </div>
+                            <div class="content-group mt16">
+                                <div class="row">
+                                    <label
+                                        for="inventory_multi_count_max_rounds"
+                                        class="col-lg-6 o_light_label"
+                                    />
+                                    <field name="inventory_multi_count_max_rounds" />
+                                </div>
+                                <div class="row">
+                                    <label
+                                        for="inventory_multi_count_first_round_criterion"
+                                        class="col-lg-6 o_light_label"
+                                    />
+                                    <field
+                                        name="inventory_multi_count_first_round_criterion"
+                                    />
+                                </div>
+                                <div class="row">
+                                    <label
+                                        for="inventory_multi_count_tolerance_type"
+                                        class="col-lg-6 o_light_label"
+                                    />
+                                    <field name="inventory_multi_count_tolerance_type" />
+                                </div>
+                                <div class="row">
+                                    <label
+                                        for="inventory_multi_count_tolerance_value"
+                                        class="col-lg-6 o_light_label"
+                                    />
+                                    <field name="inventory_multi_count_tolerance_value" />
+                                </div>
+                                <div class="row">
+                                    <label
+                                        for="inventory_multi_count_uncounted_policy"
+                                        class="col-lg-6 o_light_label"
+                                    />
+                                    <field name="inventory_multi_count_uncounted_policy" />
+                                </div>
+                                <div class="row">
+                                    <field
+                                        name="inventory_multi_count_different_counter"
+                                    />
+                                    <label
+                                        for="inventory_multi_count_different_counter"
+                                        class="o_light_label"
+                                    />
+                                </div>
+                                <div class="row">
+                                    <field name="inventory_multi_count_zero_moves" />
+                                    <label
+                                        for="inventory_multi_count_zero_moves"
+                                        class="o_light_label"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="stock_inventory_count_line_view_tree" model="ir.ui.view">
+        <field name="name">stock.inventory.count.line.tree</field>
+        <field name="model">stock.inventory.count.line</field>
+        <field name="arch" type="xml">
+            <tree
+                editable="bottom"
+                decoration-danger="state == 'divergent'"
+                decoration-muted="state in ('applied', 'cancel')"
+                decoration-success="state == 'matched'"
+            >
+                <field name="round_state" invisible="1" />
+                <field name="product_tracking" invisible="1" />
+                <field name="company_id" invisible="1" />
+                <field name="round_number" optional="show" readonly="1" />
+                <!--
+                    Identity of an existing line is frozen as soon as the round
+                    leaves draft: a counter types quantities, never re-points a
+                    line at another product or location. New rows stay editable
+                    so that stock found where none was expected can be added.
+                    ``id`` is always available in modifiers without being
+                    declared in the view.
+                -->
+                <field
+                    name="location_id"
+                    attrs="{'readonly': ['&amp;', ('round_state', '!=', 'draft'), ('id', '!=', False)]}"
+                />
+                <field
+                    name="product_id"
+                    attrs="{'readonly': ['&amp;', ('round_state', '!=', 'draft'), ('id', '!=', False)]}"
+                />
+                <field
+                    name="lot_id"
+                    attrs="{'readonly': ['|', '&amp;', ('round_state', '!=', 'draft'), ('id', '!=', False), ('product_tracking', 'not in', ['lot', 'serial'])]}"
+                    optional="show"
+                />
+                <field name="package_id" optional="hide" />
+                <field name="owner_id" optional="hide" />
+                <field name="product_uom_id" groups="uom.group_uom" readonly="1" />
+                <!--
+                    theoretical_qty, previous_qty and the difference fields are
+                    restricted to stock managers at ORM level: the web client
+                    simply drops them for a counter, which is what makes the
+                    count blind.
+                -->
+                <field name="theoretical_qty" optional="show" />
+                <field name="previous_qty" optional="show" />
+                <field
+                    name="counted_qty"
+                    attrs="{'readonly': [('round_state', '!=', 'in_progress')]}"
+                />
+                <field name="counted" optional="show" />
+                <field name="difference" optional="show" sum="Difference" />
+                <field name="difference_percent" optional="hide" />
+                <field name="difference_previous" optional="hide" />
+                <field name="user_id" optional="show" readonly="1" />
+                <field name="count_date" optional="hide" readonly="1" />
+                <field name="arbitration_qty" optional="hide" readonly="1" />
+                <field name="final_qty" optional="hide" readonly="1" />
+                <field name="note" optional="hide" />
+                <field name="state" widget="badge" readonly="1" />
+                <button
+                    name="action_open_arbitrate_wizard"
+                    type="object"
+                    icon="fa-gavel"
+                    title="Arbitrate"
+                    attrs="{'invisible': [('state', '!=', 'divergent')]}"
+                    groups="stock.group_stock_manager"
+                />
+            </tree>
+        </field>
+    </record>
+
+    <record id="stock_inventory_count_line_view_form" model="ir.ui.view">
+        <field name="name">stock.inventory.count.line.form</field>
+        <field name="model">stock.inventory.count.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button
+                        name="action_open_arbitrate_wizard"
+                        type="object"
+                        string="Arbitrate"
+                        class="oe_highlight"
+                        attrs="{'invisible': [('state', '!=', 'divergent')]}"
+                        groups="stock.group_stock_manager"
+                    />
+                    <field name="state" widget="statusbar" />
+                </header>
+                <sheet>
+                    <group>
+                        <group name="identity" string="Item">
+                            <field name="round_id" readonly="1" />
+                            <field name="round_number" readonly="1" />
+                            <!-- Same rule as the list, otherwise opening the
+                                 line in form view is a way around it. -->
+                            <field
+                                name="location_id"
+                                attrs="{'readonly': ['&amp;', ('round_state', '!=', 'draft'), ('id', '!=', False)]}"
+                            />
+                            <field
+                                name="product_id"
+                                attrs="{'readonly': ['&amp;', ('round_state', '!=', 'draft'), ('id', '!=', False)]}"
+                            />
+                            <field name="product_tracking" invisible="1" />
+                            <field
+                                name="lot_id"
+                                attrs="{'readonly': ['&amp;', ('round_state', '!=', 'draft'), ('id', '!=', False)]}"
+                            />
+                            <field
+                                name="package_id"
+                                attrs="{'readonly': ['&amp;', ('round_state', '!=', 'draft'), ('id', '!=', False)]}"
+                            />
+                            <field
+                                name="owner_id"
+                                attrs="{'readonly': ['&amp;', ('round_state', '!=', 'draft'), ('id', '!=', False)]}"
+                            />
+                            <field name="company_id" invisible="1" />
+                        </group>
+                        <group name="count" string="Count">
+                            <field name="round_state" invisible="1" />
+                            <field name="theoretical_qty" />
+                            <field name="previous_qty" />
+                            <field
+                                name="counted_qty"
+                                attrs="{'readonly': [('round_state', '!=', 'in_progress')]}"
+                            />
+                            <field name="counted" />
+                            <field name="difference" />
+                            <field name="difference_percent" />
+                            <field name="difference_previous" />
+                            <field name="final_qty" />
+                            <field name="user_id" />
+                            <field name="previous_user_id" />
+                            <field name="count_date" />
+                        </group>
+                    </group>
+                    <group
+                        name="arbitration"
+                        string="Arbitration"
+                        attrs="{'invisible': [('state', '!=', 'arbitrated')]}"
+                    >
+                        <field name="arbitration_qty" />
+                        <field name="arbitrated_by_id" />
+                    </group>
+                    <group name="note_group" string="Justification">
+                        <field name="note" nolabel="1" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="stock_inventory_count_line_view_search" model="ir.ui.view">
+        <field name="name">stock.inventory.count.line.search</field>
+        <field name="model">stock.inventory.count.line</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id" />
+                <field name="location_id" />
+                <field name="lot_id" />
+                <field name="inventory_id" />
+                <field name="round_id" />
+                <field name="user_id" />
+                <filter
+                    name="to_count"
+                    string="To Count"
+                    domain="[('counted', '=', False)]"
+                />
+                <filter
+                    name="counted"
+                    string="Counted"
+                    domain="[('counted', '=', True)]"
+                />
+                <separator />
+                <filter
+                    name="divergent"
+                    string="Divergent"
+                    domain="[('state', '=', 'divergent')]"
+                />
+                <filter
+                    name="applied"
+                    string="Applied"
+                    domain="[('state', '=', 'applied')]"
+                />
+                <separator />
+                <filter
+                    name="open_rounds"
+                    string="Open Rounds"
+                    domain="[('round_state', '=', 'in_progress')]"
+                />
+                <group expand="0" string="Group By">
+                    <filter
+                        name="group_by_location"
+                        string="Location"
+                        context="{'group_by': 'location_id'}"
+                    />
+                    <filter
+                        name="group_by_product"
+                        string="Product"
+                        context="{'group_by': 'product_id'}"
+                    />
+                    <filter
+                        name="group_by_round"
+                        string="Round"
+                        context="{'group_by': 'round_id'}"
+                    />
+                    <filter
+                        name="group_by_state"
+                        string="Status"
+                        context="{'group_by': 'state'}"
+                    />
+                    <filter
+                        name="group_by_user"
+                        string="Counted By"
+                        context="{'group_by': 'user_id'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_stock_inventory_count_line" model="ir.actions.act_window">
+        <field name="name">Count Lines</field>
+        <field name="res_model">stock.inventory.count.line</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="stock_inventory_count_line_view_search" />
+        <field name="context">{'search_default_open_rounds': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No count line here</p>
+            <p>Count lines are generated when a blind multi count inventory is started.</p>
+        </field>
+    </record>
+
+</odoo>

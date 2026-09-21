@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="stock_inventory_count_round_view_tree" model="ir.ui.view">
+        <field name="name">stock.inventory.count.round.tree</field>
+        <field name="model">stock.inventory.count.round</field>
+        <field name="arch" type="xml">
+            <tree
+                decoration-info="state == 'in_progress'"
+                decoration-muted="state == 'cancel'"
+                decoration-success="state == 'done'"
+            >
+                <field name="name" />
+                <field name="inventory_id" optional="show" />
+                <field name="round_number" />
+                <field name="user_ids" widget="many2many_tags" optional="show" />
+                <field name="line_count" />
+                <field name="counted_count" />
+                <field name="progress" widget="progressbar" />
+                <field name="date_start" optional="hide" />
+                <field name="date_end" optional="hide" />
+                <field name="company_id" optional="hide" groups="base.group_multi_company" />
+                <field name="state" widget="badge" />
+            </tree>
+        </field>
+    </record>
+
+    <record id="stock_inventory_count_round_view_form" model="ir.ui.view">
+        <field name="name">stock.inventory.count.round.form</field>
+        <field name="model">stock.inventory.count.round</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button
+                        name="action_start"
+                        type="object"
+                        string="Start Counting"
+                        class="oe_highlight"
+                        attrs="{'invisible': [('state', '!=', 'draft')]}"
+                    />
+                    <button
+                        name="action_print_count_sheet"
+                        type="object"
+                        string="Print Count Sheet"
+                        attrs="{'invisible': [('state', 'not in', ['draft', 'in_progress'])]}"
+                    />
+                    <button
+                        name="action_open_import_wizard"
+                        type="object"
+                        string="Import Counts"
+                        attrs="{'invisible': [('state', '!=', 'in_progress')]}"
+                    />
+                    <button
+                        name="action_close"
+                        type="object"
+                        string="Close Round"
+                        class="oe_highlight"
+                        confirm="Closing the round reconciles the matching lines, adjusts stock and opens the next round for the divergent ones. Continue?"
+                        attrs="{'invisible': [('state', '!=', 'in_progress')]}"
+                        groups="stock.group_stock_manager"
+                    />
+                    <button
+                        name="action_cancel"
+                        type="object"
+                        string="Cancel"
+                        attrs="{'invisible': [('state', 'in', ['done', 'cancel'])]}"
+                        groups="stock.group_stock_manager"
+                    />
+                    <field name="state" widget="statusbar" />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+                            name="action_open_lines"
+                            type="object"
+                            class="oe_stat_button"
+                            icon="fa-list-ol"
+                        >
+                            <field name="line_count" widget="statinfo" string="Lines" />
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field name="name" readonly="1" /></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="inventory_id" readonly="1" />
+                            <field name="round_number" readonly="1" />
+                            <field
+                                name="user_ids"
+                                widget="many2many_tags"
+                                options="{'no_create': True}"
+                            />
+                        </group>
+                        <group>
+                            <field name="date_start" />
+                            <field name="date_end" />
+                            <field name="counted_count" />
+                            <field name="progress" widget="progressbar" />
+                            <field
+                                name="company_id"
+                                groups="base.group_multi_company"
+                            />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="lines" string="Count Lines">
+                            <field name="line_ids" nolabel="1" />
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers" />
+                    <field name="message_ids" widget="mail_thread" />
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <record id="stock_inventory_count_round_view_search" model="ir.ui.view">
+        <field name="name">stock.inventory.count.round.search</field>
+        <field name="model">stock.inventory.count.round</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="inventory_id" />
+                <field name="user_ids" />
+                <filter
+                    name="in_progress"
+                    string="Counting"
+                    domain="[('state', '=', 'in_progress')]"
+                />
+                <filter
+                    name="my_rounds"
+                    string="Assigned to me"
+                    domain="[('user_ids', 'in', [uid])]"
+                />
+                <group expand="0" string="Group By">
+                    <filter
+                        name="group_by_inventory"
+                        string="Inventory"
+                        context="{'group_by': 'inventory_id'}"
+                    />
+                    <filter
+                        name="group_by_state"
+                        string="Status"
+                        context="{'group_by': 'state'}"
+                    />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_stock_inventory_count_round" model="ir.actions.act_window">
+        <field name="name">Count Rounds</field>
+        <field name="res_model">stock.inventory.count.round</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="stock_inventory_count_round_view_search" />
+    </record>
+
+    <menuitem
+        id="menu_stock_inventory_count_round"
+        name="Count Rounds"
+        parent="stock.menu_stock_warehouse_mgmt"
+        action="action_stock_inventory_count_round"
+        sequence="31"
+    />
+
+</odoo>

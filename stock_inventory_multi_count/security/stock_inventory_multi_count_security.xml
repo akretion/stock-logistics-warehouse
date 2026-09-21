@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="group_stock_inventory_counter" model="res.groups">
+        <field name="name">Inventory Counter</field>
+        <field name="category_id" ref="base.module_category_inventory_inventory" />
+        <field name="implied_ids" eval="[(4, ref('stock.group_stock_user'))]" />
+        <field
+            name="comment"
+        >Users who enter physical counts. They only see the rounds they are assigned to and never the theoretical quantity.</field>
+    </record>
+
+    <!-- Multi-company -->
+    <record id="stock_inventory_count_round_comp_rule" model="ir.rule">
+        <field name="name">Inventory Count Round multi-company</field>
+        <field name="model_id" ref="model_stock_inventory_count_round" />
+        <field name="global" eval="True" />
+        <field
+            name="domain_force"
+        >['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="stock_inventory_count_line_comp_rule" model="ir.rule">
+        <field name="name">Inventory Count Line multi-company</field>
+        <field name="model_id" ref="model_stock_inventory_count_line" />
+        <field name="global" eval="True" />
+        <field
+            name="domain_force"
+        >['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <!--
+        Non-global rules of different groups are OR-ed, so a user holding both
+        the counter and the manager group keeps full visibility.
+    -->
+    <record id="stock_inventory_count_line_counter_rule" model="ir.rule">
+        <field name="name">Inventory Count Line: own rounds only</field>
+        <field name="model_id" ref="model_stock_inventory_count_line" />
+        <field name="global" eval="False" />
+        <field
+            name="groups"
+            eval="[(4, ref('stock_inventory_multi_count.group_stock_inventory_counter'))]"
+        />
+        <field
+            name="domain_force"
+        >['|', ('round_id.user_ids', '=', False), ('round_id.user_ids', 'in', [user.id])]</field>
+    </record>
+
+    <record id="stock_inventory_count_line_manager_rule" model="ir.rule">
+        <field name="name">Inventory Count Line: stock manager</field>
+        <field name="model_id" ref="model_stock_inventory_count_line" />
+        <field name="global" eval="False" />
+        <field name="groups" eval="[(4, ref('stock.group_stock_manager'))]" />
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="stock_inventory_count_round_counter_rule" model="ir.rule">
+        <field name="name">Inventory Count Round: own rounds only</field>
+        <field name="model_id" ref="model_stock_inventory_count_round" />
+        <field name="global" eval="False" />
+        <field
+            name="groups"
+            eval="[(4, ref('stock_inventory_multi_count.group_stock_inventory_counter'))]"
+        />
+        <field
+            name="domain_force"
+        >['|', ('user_ids', '=', False), ('user_ids', 'in', [user.id])]</field>
+    </record>
+
+    <record id="stock_inventory_count_round_manager_rule" model="ir.rule">
+        <field name="name">Inventory Count Round: stock manager</field>
+        <field name="model_id" ref="model_stock_inventory_count_round" />
+        <field name="global" eval="False" />
+        <field name="groups" eval="[(4, ref('stock.group_stock_manager'))]" />
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+</odoo>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <template id="report_count_sheet_document">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <h2>
+                    <span t-field="doc.name" />
+                </h2>
+                <div class="row mt16 mb16">
+                    <div class="col-6">
+                        <strong>Inventory:</strong>
+                        <span t-field="doc.inventory_id.name" />
+                        <br />
+                        <strong>Round:</strong>
+                        <span t-field="doc.round_number" />
+                    </div>
+                    <div class="col-6">
+                        <strong>Counters:</strong>
+                        <span
+                            t-esc="', '.join(doc.user_ids.mapped('name')) or '________________'"
+                        />
+                        <br />
+                        <strong>Date:</strong>
+                        <span t-esc="'____ / ____ / ________'" />
+                    </div>
+                </div>
+
+                <t
+                    t-set="lines"
+                    t-value="doc.line_ids.filtered(lambda l: l.state in ('pending', 'counted'))"
+                />
+                <t
+                    t-set="locations"
+                    t-value="lines.mapped('location_id').sorted(lambda l: l.complete_name)"
+                />
+
+                <t t-foreach="locations" t-as="location">
+                    <h4 class="mt16">
+                        <span t-field="location.complete_name" />
+                    </h4>
+                    <table class="table table-sm o_main_table">
+                        <thead>
+                            <tr>
+                                <th>Reference</th>
+                                <th>Product</th>
+                                <th>Lot/Serial</th>
+                                <th>UoM</th>
+                                <th class="text-end" style="width:22%;">Counted Quantity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t
+                                t-foreach="lines.filtered(lambda l: l.location_id.id == location.id)"
+                                t-as="line"
+                            >
+                                <tr>
+                                    <td>
+                                        <span t-field="line.product_id.default_code" />
+                                    </td>
+                                    <td>
+                                        <span t-field="line.product_id.name" />
+                                    </td>
+                                    <td>
+                                        <span t-field="line.lot_id.name" />
+                                    </td>
+                                    <td>
+                                        <span t-field="line.product_uom_id.name" />
+                                    </td>
+                                    <td class="text-end">
+                                        <span>___________</span>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                </t>
+
+                <div class="row mt32">
+                    <div class="col-6">
+                        <p>Counted by: ______________________________</p>
+                    </div>
+                    <div class="col-6">
+                        <p>Checked by: ______________________________</p>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="report_count_sheet">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t
+                    t-call="stock_inventory_multi_count.report_count_sheet_document"
+                    t-lang="doc.company_id.partner_id.lang"
+                />
+            </t>
+        </t>
+    </template>
+
+</odoo>

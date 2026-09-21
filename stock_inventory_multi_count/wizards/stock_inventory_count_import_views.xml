@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="stock_inventory_count_import_view_form" model="ir.ui.view">
+        <field name="name">stock.inventory.count.import.form</field>
+        <field name="model">stock.inventory.count.import</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                    <field name="round_id" />
+                    <field name="data_file" filename="filename" />
+                    <field name="filename" invisible="1" />
+                    <field name="delimiter" />
+                    <field name="has_header" />
+                    <field name="create_missing_lines" />
+                </group>
+                <group string="Or paste the counts">
+                    <field name="paste_data" nolabel="1" placeholder="STOCK/Shelf 1;FURN_7777;12&#10;STOCK/Shelf 2;FURN_8888;0" />
+                </group>
+                <div class="alert alert-info" role="alert">
+                    Expected columns, in this order:
+                    <strong>location</strong> (barcode or full name),
+                    <strong>product</strong> (internal reference, barcode or name),
+                    <strong>lot/serial</strong> (optional, only when a 4th column is present)
+                    and <strong>quantity</strong>.
+                </div>
+                <footer>
+                    <button
+                        name="action_import"
+                        type="object"
+                        string="Import"
+                        class="btn-primary"
+                    />
+                    <button string="Cancel" class="btn-secondary" special="cancel" />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+
+    <record id="view_inventory_group_form" model="ir.ui.view">
+        <field name="name">stock.inventory.form.multi.count</field>
+        <field name="model">stock.inventory</field>
+        <field name="inherit_id" ref="stock_inventory.view_inventory_group_form" />
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute
+                    name="statusbar_visible"
+                >draft,in_progress,arbitration,done</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='action_state_to_done']" position="attributes">
+                <attribute
+                    name="attrs"
+                >{'invisible': ['|', ('state', 'in', ['draft', 'done']), ('count_mode', '=', 'multi')]}</attribute>
+            </xpath>
+
+            <xpath expr="//button[@name='action_state_to_in_progress']" position="before">
+                <field name="count_mode" invisible="1" />
+                <field name="current_round_id" invisible="1" />
+            </xpath>
+
+            <xpath expr="//button[@name='action_state_to_done']" position="after">
+                <button
+                    name="action_close_current_round"
+                    type="object"
+                    string="Close Current Round"
+                    class="oe_highlight"
+                    confirm="Closing the round reconciles the matching lines, adjusts stock and opens the next round for the divergent ones. Continue?"
+                    attrs="{'invisible': ['|', '|', ('count_mode', '!=', 'multi'), ('state', '!=', 'in_progress'), ('current_round_id', '=', False)]}"
+                    groups="stock.group_stock_manager"
+                />
+                <button
+                    name="action_open_arbitration"
+                    type="object"
+                    string="Arbitrate"
+                    class="oe_highlight"
+                    attrs="{'invisible': [('state', '!=', 'arbitration')]}"
+                    groups="stock.group_stock_manager"
+                />
+            </xpath>
+
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button
+                    name="action_view_rounds"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-repeat"
+                    attrs="{'invisible': [('count_mode', '!=', 'multi')]}"
+                >
+                    <field name="round_count" widget="statinfo" string="Rounds" />
+                </button>
+                <button
+                    name="action_view_count_lines"
+                    type="object"
+                    class="oe_stat_button"
+                    icon="fa-list-ol"
+                    attrs="{'invisible': [('count_mode', '!=', 'multi')]}"
+                >
+                    <field
+                        name="count_line_count"
+                        widget="statinfo"
+                        string="Count Lines"
+                    />
+                </button>
+            </xpath>
+
+            <xpath expr="//sheet/group" position="after">
+                <group name="multi_count" string="Blind Multi Count">
+                    <group>
+                        <field name="count_mode" widget="radio" />
+                        <field
+                            name="max_rounds"
+                            attrs="{'invisible': [('count_mode', '!=', 'multi')], 'required': [('count_mode', '=', 'multi')]}"
+                        />
+                        <field
+                            name="first_round_criterion"
+                            attrs="{'invisible': [('count_mode', '!=', 'multi')], 'required': [('count_mode', '=', 'multi')]}"
+                        />
+                        <field
+                            name="require_different_counter"
+                            attrs="{'invisible': [('count_mode', '!=', 'multi')]}"
+                        />
+                    </group>
+                    <group>
+                        <field
+                            name="tolerance_type"
+                            attrs="{'invisible': [('count_mode', '!=', 'multi')], 'required': [('count_mode', '=', 'multi')]}"
+                        />
+                        <field
+                            name="tolerance_value"
+                            attrs="{'invisible': ['|', ('count_mode', '!=', 'multi'), ('tolerance_type', '=', 'exact')]}"
+                        />
+                        <field
+                            name="uncounted_policy"
+                            attrs="{'invisible': [('count_mode', '!=', 'multi')], 'required': [('count_mode', '=', 'multi')]}"
+                        />
+                        <field
+                            name="create_zero_moves"
+                            attrs="{'invisible': [('count_mode', '!=', 'multi')]}"
+                        />
+                        <field name="current_round_number" attrs="{'invisible': [('count_mode', '!=', 'multi')]}" />
+                    </group>
+                </group>
+                <notebook>
+                    <page
+                        name="rounds"
+                        string="Count Rounds"
+                        attrs="{'invisible': [('count_mode', '!=', 'multi')]}"
+                    >
+                        <field name="round_ids" nolabel="1" readonly="1" />
+                    </page>
+                </notebook>
+            </xpath>
+
+        </field>
+    </record>
+
+    <record id="view_inventory_group_tree" model="ir.ui.view">
+        <field name="name">stock.inventory.tree.multi.count</field>
+        <field name="model">stock.inventory</field>
+        <field name="inherit_id" ref="stock_inventory.view_inventory_group_tree" />
+        <field name="arch" type="xml">
+            <field name="state" position="before">
+                <field name="count_mode" optional="show" />
+                <field name="current_round_number" optional="hide" />
+            </field>
+        </field>
+    </record>
+
+    <record id="stock_inventory_search_view" model="ir.ui.view">
+        <field name="name">stock.inventory.search.multi.count</field>
+        <field name="model">stock.inventory</field>
+        <field name="inherit_id" ref="stock_inventory.stock_inventory_search_view" />
+        <field name="arch" type="xml">
+            <search position="inside">
+                <filter
+                    name="multi_count"
+                    string="Blind Multi Count"
+                    domain="[('count_mode', '=', 'multi')]"
+                />
+                <filter
+                    name="arbitration"
+                    string="Waiting Arbitration"
+                    domain="[('state', '=', 'arbitration')]"
+                />
+            </search>
+        </field>
+    </record>
+
+</odoo>
